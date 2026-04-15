@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>BszTeam · Archivo Hacktivista</title>
+    <!-- Fuentes tipográficas -->
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,500&display=swap" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --cream: #f4efe6;
+            --cream-alt: #ede8df;
+            --ink: #0c0c0c;
+            --gold: #b89a5a;
+            --gold-light: #d4b97a;
+            --steel: #7a7a7a;
+            --steel-light: #adadad;
+            --rule: 1.5px solid var(--ink);
+            --rule-thick: 2.5px solid var(--ink);
+            --red-accent: #aa2e2e;
+        }
+
+        html {
+            height: 100%;
+            font-size: 16px;
+        }
+
+        body {
+            height: 100%;
+            background: var(--cream);
+            color: var(--ink);
+            cursor: none;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #cursor-outer {
+            position: fixed;
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--ink);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            transform: translate(-50%, -50%);
+            transition: width 0.25s ease, height 0.25s ease, background 0.25s ease;
+            mix-blend-mode: multiply;
+        }
+        #cursor-inner {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--ink);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999;
+            transform: translate(-50%, -50%);
+        }
+        #cursor-label {
+            position: fixed;
+            font-family: "Space Mono", monospace;
+            font-size: 7.5px;
+            letter-spacing: 0.2em;
+            pointer-events: none;
+            z-index: 99999;
+            opacity: 0;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+            transform: translate(-50%, 22px);
+        }
+        body.cursor-hover #cursor-outer {
+            width: 54px;
+            height: 54px;
+            background: rgba(12, 12, 12, 0.07);
+        }
+        body.show-label #cursor-label {
+            opacity: 1;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        .shell {
+            display: grid;
+            width: 100vw;
+            height: 100vh;
+            grid-template-columns: 200px 1fr 280px;
+            grid-template-rows: 48px 1fr 56px;
+            border: var(--rule-thick);
+            overflow: hidden;
+        }
+
+        .masthead {
+            grid-column: 1 / -1;
+            grid-row: 1;
+            display: grid;
+            grid-template-columns: 200px 1fr 280px;
+            border-bottom: var(--rule-thick);
+            background: var(--cream);
+            position: relative;
+            z-index: 10;
+        }
+
+        .masthead-brand {
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            border-right: var(--rule-thick);
+        }
+
+        .brand-name {
+            font-family: "Unbounded", sans-serif;
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+        }
+
+        .brand-stroke {
+            font-family: "Unbounded", sans-serif;
+            font-size: 8px;
+            font-weight: 900;
+            letter-spacing: 0.32em;
+            -webkit-text-stroke: 0.8px var(--ink);
+            color: transparent;
+        }
+
+        .masthead-nav {
+            display: flex;
+            align-items: center;
+            padding: 0 28px;
+            gap: 32px;
+        }
+
+        .nav-item {
+            font-family: "Space Mono", monospace;
+            font-size: 7.5px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--steel);
+            position: relative;
+        }
+
+        .nav-item.active {
+            color: var(--ink);
+        }
+
+        .nav-item.active::after {
+            content: "";
+            position: absolute;
+            bottom: -17px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gold);
+        }
+
+        .masthead-meta {
+            border-left: var(--rule-thick);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .meta-tag {
+            font-family: "Space Mono", monospace;
+            font-size: 7px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            border: 1px solid var(--ink);
+            padding: 3px 8px;
+            background: var(--ink);
+            color: var(--cream);
+        }
+
+        .meta-count {
+            font-family: "Space Mono", monospace;
+            font-size: 8px;
+            letter-spacing: 0.15em;
+            color: var(--steel);
+        }
+
+        .sidebar-left {
+            grid-column: 1;
+            grid-row: 2 / 4;
+            border-right: var(--rule-thick);
+            display: flex;
+            flex-direction: column;
+            background: var(--cream);
+            position: relative;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .sl-counter {
+            padding: 22px 20px 18px;
+            border-bottom: var(--rule);
+            flex-shrink: 0;
+        }
+
+        .sl-counter-label {
+            font-family: "Space Mono", monospace;
+            font-size: 7px;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--steel);
+            margin-bottom: 6px;
+        }
+
+        .sl-counter-number {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 3.4rem;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .sl-counter-total {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 1rem;
+            font-weight: 300;
+            color: var(--steel);
+            margin-bottom: 3px;
+        }
+
+        .sl-dots {
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-bottom: var(--rule);
+            flex-shrink: 0;
+        }
+
+        .sl-dot-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: none;
+            padding: 4px 0;
+        }
+
+        .sl-dot-track {
+            width: 26px;
+            height: 1.5px;
+            background: var(--steel-light);
+            flex-shrink: 0;
+            transition: background 0.25s, width 0.3s;
+        }
+
+        .sl-dot-row.active .sl-dot-track {
+            background: var(--ink);
+            width: 38px;
+        }
+        .sl-dot-row:hover .sl-dot-track {
+            background: var(--gold-light);
+        }
+
+        .sl-dot-label {
+            font-family: "Space Mono", monospace;
+            font-size: 7.5px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--steel);
+            transition: color 0.25s;
+        }
+
+        .sl-dot-row.active .sl-dot-label {
+            color: var(--ink);
+        }
+
+        .gold-rule {
+            height: 1px;
+            background: var(--gold);
+            margin: 0 20px;
+            flex-shrink: 0;
+        }
+
+        .sl-details {
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sl-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .sl-detail-key {
+            font-family: "Space Mono", monospace;
+            font-size: 7px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--steel-light);
+        }
+
+        .sl-detail-val {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        .sl-arrows {
+            display: flex;
+            border-top: var(--rule);
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+
+        .sl-arrow {
+            flex: 1;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: none;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .sl-arrow:first-child {
+            border-right: var(--rule);
+        }
+        .sl-arrow:hover {
+            background: var(--ink);
+            color: var(--cream);
+        }
+
+        .image-stage {
+            grid-column: 2;
+            grid-row: 2;
+            position: relative;
+            overflow: hidden;
+            background: #1c1a18;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.75s cubic-bezier(0.6, 0, 0.2, 1),
+                        transform 0.75s cubic-bezier(0.6, 0, 0.2, 1);
+            transform: scale(1.04);
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .slide-ghost {
+            position: absolute;
+            bottom: -20px;
+            right: -6px;
+            font-family: "Unbounded", sans-serif;
+            font-size: clamp(5rem, 11vw, 10rem);
+            font-weight: 900;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.09);
+            pointer-events: none;
+            line-height: 1;
+            z-index: 2;
+            user-select: none;
+        }
+
+        .slide-vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.28) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .progress-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            background: var(--gold);
+            width: 0%;
+            z-index: 5;
+        }
+
+        .click-zone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 35%;
+            z-index: 4;
+            cursor: none;
+        }
+        .click-zone.left { left: 0; }
+        .click-zone.right { right: 0; }
+
+        .filmstrip {
+            grid-column: 2;
+            grid-row: 3;
+            border-top: var(--rule-thick);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: var(--cream);
+        }
+
+        .film-thumb {
+            position: relative;
+            overflow: hidden;
+            cursor: none;
+            border-right: var(--rule);
+        }
+        .film-thumb:last-child { border-right: none; }
+
+        .film-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: grayscale(0.5) contrast(1.05);
+            transition: filter 0.3s;
+        }
+
+        .film-thumb.active img,
+        .film-thumb:hover img {
+            filter: grayscale(0) contrast(1.05);
+        }
+
+        .film-thumb-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: flex-end;
+            padding: 5px 7px;
+        }
+
+        .film-thumb.active .film-thumb-overlay {
+            border-top: 2px solid var(--gold);
+        }
+
+        .film-num {
+            font-family: "Space Mono", monospace;
+            font-size: 6.5px;
+            letter-spacing: 0.2em;
+            color: rgba(244,239,230,0.85);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .panel-right {
+            grid-column: 3;
+            grid-row: 2 / 4;
+            border-left: var(--rule-thick);
+            display: flex;
+            flex-direction: column;
+            background: var(--cream);
+            overflow: hidden;
+        }
+
+        .pr-title {
+            padding: 24px 22px 0;
+            flex-shrink: 0;
+        }
+
+        .pr-eyebrow {
+            font-family: "Space Mono", monospace;
+            font-size: 7px;
+            letter-spacing: 0.38em;
+            text-transform: uppercase;
+            color: var(--steel);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pr-eyebrow::before {
+            content: "";
+            display: inline-block;
+            width: 18px;
+            height: 1px;
+            background: var(--gold);
+        }
+
+        .pr-headline {
+            font-family: "Cormorant Garamond", serif;
+            font-size: clamp(1.9rem, 2.6vw, 2.5rem);
+            font-weight: 700;
+            line-height: 0.92;
+            letter-spacing: -0.015em;
+            margin-bottom: 4px;
+        }
+
+        .pr-headline em {
+            display: block;
+            font-weight: 300;
+            font-style: italic;
+            -webkit-text-stroke: 0.8px var(--ink);
+            color: transparent;
+            font-size: 1.12em;
+            line-height: 1.02;
+        }
+
+        .pr-sub {
+            font-family: "Space Mono", monospace;
+            font-size: 7.5px;
+            letter-spacing: 0.18em;
+            color: var(--steel);
+            margin-top: 10px;
+            margin-bottom: 22px;
+        }
+
+        .pr-section-head {
+            display: flex;
+            align-items: center;
+            padding: 10px 22px;
+            border-top: var(--rule);
+            border-bottom: var(--rule);
+            background: var(--cream-alt);
+            flex-shrink: 0;
+        }
+
+        .pr-section-label {
+            font-family: "Space Mono", monospace;
+            font-size: 7px;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+        }
+
+        .pr-section-sym {
+            margin-left: auto;
+            font-size: 10px;
+            color: var(--gold);
+        }
+
+        .pr-inspo {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            scrollbar-width: none;
+        }
+        .pr-inspo::-webkit-scrollbar { display: none; }
+
+        .inspo-item {
+            padding: 17px 22px;
+            border-bottom: var(--rule);
+            position: relative;
+            transition: background 0.2s;
+        }
+        .inspo-item:hover {
+            background: var(--cream-alt);
+        }
+
+        .inspo-num {
+            font-family: "Space Mono", monospace;
+            font-size: 7px;
+            letter-spacing: 0.2em;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .inspo-text {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 1.06rem;
+            font-weight: 300;
+            font-style: italic;
+            line-height: 1.52;
+            letter-spacing: 0.01em;
+        }
+
+        .inspo-attr {
+            font-family: "Space Mono", monospace;
+            font-size: 6.5px;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--steel);
+            margin-top: 8px;
+        }
+
+        .pr-footer {
+            border-top: var(--rule-thick);
+            padding: 12px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            background: var(--ink);
+        }
+
+        .pr-footer-label {
+            font-family: "Space Mono", monospace;
+            font-size: 7px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--cream);
+        }
+
+        .pr-footer-gold {
+            font-family: "Cormorant Garamond", serif;
+            font-size: 13px;
+            font-style: italic;
+            font-weight: 300;
+            color: var(--gold-light);
+            letter-spacing: 0.08em;
+        }
+
+        .codepen-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: "Space Mono", monospace;
+            font-size: 6.5px;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: var(--gold-light);
+            border: 1px solid var(--gold);
+            padding: 4px 9px 4px 7px;
+            background: transparent;
+            cursor: none;
+            transition: color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .codepen-link::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--gold);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
+        }
+        .codepen-link:hover::before { transform: scaleX(1); }
+        .codepen-link:hover { color: var(--ink); }
+        .codepen-link svg, .codepen-link span { position: relative; z-index: 1; }
+
+        .fade-el {
+            transition: opacity 0.32s ease, transform 0.32s ease;
+        }
+        .fade-el.out {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+
+        @media (max-width: 960px) {
+            .shell { grid-template-columns: 160px 1fr 230px; }
+        }
+        @media (max-width: 700px) {
+            body { overflow: auto; }
+            .shell { grid-template-columns: 1fr; grid-template-rows: 44px 55vw 44px 1fr; height: auto; min-height: 100svh; }
+            .masthead { grid-template-columns: 1fr auto; }
+            .masthead-nav { display: none; }
+            .sidebar-left { display: none; }
+            .image-stage { grid-column: 1; grid-row: 2; }
+            .filmstrip { grid-column: 1; grid-row: 3; }
+            .panel-right { grid-column: 1; grid-row: 4; border-left: none; border-top: var(--rule-thick); min-height: 360px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="cursor-outer"></div>
+<div id="cursor-inner"></div>
+<div id="cursor-label"></div>
+
+<div class="shell">
+
+  <header class="masthead">
+    <div class="masthead-brand">
+      <span class="brand-name">BSZ</span>
+      <span class="brand-stroke">ARCHIVE</span>
+    </div>
+    <nav class="masthead-nav">
+      <span class="nav-item active">Hacktivismo</span>
+      <span class="nav-item">Operaciones</span>
+      <span class="nav-item">Colectivo</span>
+      <span class="nav-item">Manifiesto</span>
+    </nav>
+    <div class="masthead-meta">
+      <span class="meta-tag">BSZTEAM</span>
+      <span class="meta-count" id="masterCount">01 / 04</span>
+    </div>
+  </header>
+
+  <aside class="sidebar-left">
+    <div class="sl-counter">
+      <div class="sl-counter-label">Registro activo</div>
+      <div class="sl-counter-number">
+        <span id="counterNum">01</span>
+        <span class="sl-counter-total">/04</span>
+      </div>
+    </div>
+    <div class="sl-dots" id="dotList"></div>
+    <div class="gold-rule"></div>
+    <div class="sl-details">
+      <div class="sl-detail"><span class="sl-detail-key">Origen</span><span class="sl-detail-val fade-el" id="dOrigin">—</span></div>
+      <div class="sl-detail"><span class="sl-detail-key">Tácticas</span><span class="sl-detail-val fade-el" id="dTacticas">—</span></div>
+      <div class="sl-detail"><span class="sl-detail-key">Alcance</span><span class="sl-detail-val fade-el" id="dAlcance">—</span></div>
+      <div class="sl-detail"><span class="sl-detail-key">Filosofía</span><span class="sl-detail-val fade-el" id="dFilosofia">—</span></div>
+    </div>
+    <div class="sl-arrows">
+      <div class="sl-arrow" id="prevBtn">←</div>
+      <div class="sl-arrow" id="nextBtn">→</div>
+    </div>
+  </aside>
+
+  <main class="image-stage">
+    <!-- Nuevas imágenes estilo ciber/hacktivismo (subidas a un CDN simbólico) -->
+    <div class="slide active" data-index="0">
+      <img src="https://i89.servimg.com/u/f89/20/65/02/15/photo_10.png" alt="BszTeam - Núcleo">
+      <span class="slide-ghost">01</span>
+    </div>
+    <div class="slide" data-index="1">
+      <img src="https://i89.servimg.com/u/f89/20/65/02/15/screen10.png" alt="BszTeam - Infraestructura">
+      <span class="slide-ghost">02</span>
+    </div>
+    <div class="slide" data-index="2">
+      <img src="https://i89.servimg.com/u/f89/20/65/02/15/screen11.png" alt="BszTeam - Operaciones">
+      <span class="slide-ghost">03</span>
+    </div>
+    <div class="slide" data-index="3">
+      <img src="https://i89.servimg.com/u/f89/20/65/02/15/screen12.png" alt="BszTeam - Comunidad">
+      <span class="slide-ghost">04</span>
+    </div>
+    <div class="slide-vignette"></div>
+    <div class="progress-line" id="progressLine"></div>
+    <div class="click-zone left" id="zoneLeft"></div>
+    <div class="click-zone right" id="zoneRight"></div>
+  </main>
+
+  <div class="filmstrip">
+    <div class="film-thumb active" data-idx="0"><img src="https://i89.servimg.com/u/f89/20/65/02/15/photo_10.png" alt=""><div class="film-thumb-overlay"><span class="film-num">BSZ/01</span></div></div>
+    <div class="film-thumb" data-idx="1"><img src="https://i89.servimg.com/u/f89/20/65/02/15/screen10.png" alt=""><div class="film-thumb-overlay"><span class="film-num">BSZ/02</span></div></div>
+    <div class="film-thumb" data-idx="2"><img src="https://i89.servimg.com/u/f89/20/65/02/15/screen11.png" alt=""><div class="film-thumb-overlay"><span class="film-num">BSZ/03</span></div></div>
+    <div class="film-thumb" data-idx="3"><img src="https://i89.servimg.com/u/f89/20/65/02/15/screen12.png" alt=""><div class="film-thumb-overlay"><span class="film-num">BSZ/04</span></div></div>
+  </div>
+
+  <aside class="panel-right">
+    <div class="pr-title">
+      <div class="pr-eyebrow" id="prEyebrow">Dossier · BszTeam</div>
+      <h2 class="pr-headline fade-el" id="prHeadline">BSZ<em>Hackers</em></h2>
+      <div class="pr-sub fade-el" id="prSub">// Colectivo · Red · Resistencia</div>
+    </div>
+    <div class="pr-section-head">
+      <span class="pr-section-label">✦ &nbsp;Manifiesto & Crónicas</span>
+      <span class="pr-section-sym">◉</span>
+    </div>
+    <div class="pr-inspo" id="inspoArea"></div>
+    <div class="pr-footer">
+      <span class="pr-footer-label">BszTeam · Archivo descentralizado</span>
+      <a href="#" class="codepen-link" id="codepenBtn" style="pointer-events:none; opacity:0.8;">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 8.5V15.5L12 22L22 15.5V8.5L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M12 2V8.5M12 22V15.5M2 8.5L12 15.5L22 8.5M12 8.5L2 15.5M12 8.5L22 15.5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+        <span>DEEP WEB</span>
+      </a>
+    </div>
+  </aside>
+</div>
+
+<script>
+  // ─────────────────────────────────────────────────────────────────
+  // DATOS COMPLETOS SOBRE BSZTEAM (hackers, comunidad, piratería, creador)
+  // ─────────────────────────────────────────────────────────────────
+  const DATA = [
+    {
+      eyebrow: "Célula fundacional",
+      name: ["BSZTEAM", "Orígenes"],
+      sub: "// Creador: @BSZ_Architect — Red clandestina",
+      dotLabel: "Núcleo & Creador",
+      details: {
+        Origin: "Deep Web · 2018",
+        Tacticas: "Ingeniería social + 0days",
+        Alcance: "Global / Iberoamérica",
+        Filosofia: "Información libre, anonimato radical"
+      },
+      inspo: [
+        { text: "BszTeam nace como un colectivo de hackers éticos y activistas digitales, fundado por el operador conocido como 'BSZ_Architect'. Su propósito inicial: auditoría de seguridad en plataformas gubernamentales y exposición de vulnerabilidades.", attr: "— Crónica fundacional" },
+        { text: "El creador, una figura elusiva, estructuró el grupo bajo principios de descentralización y opsec extrema. Sus primeras acciones incluyeron filtraciones estratégicas y protestas digitales.", attr: "— Archivo BSZ" }
+      ]
+    },
+    {
+      eyebrow: "Operaciones notables",
+      name: ["Acciones", "En la red"],
+      sub: "// Piratería, Doxing estratégico y defensa",
+      dotLabel: "Operaciones",
+      details: {
+        Origin: "Foros · IRC · Matrix",
+        Tacticas: "SQLi, Phishing inverso, Mirroring",
+        Alcance: "Corporaciones, entidades financieras",
+        Filosofia: "Contra-vigilancia"
+      },
+      inspo: [
+        { text: "Entre 2019 y 2023 el colectivo ejecutó más de 40 operaciones de alto perfil: filtraciones de bases de datos de empresas de telecomunicaciones, toma de dominios .gov y campañas de desobediencia digital masiva.", attr: "— Informe OSINT" },
+        { text: "Su estilo combina el hacktivismo clásico con tácticas de guerrilla informática. La comunidad BszHackers se convirtió en nodo de aprendizaje sobre privacidad y criptografía.", attr: "— Testimonio anónimo" }
+      ]
+    },
+    {
+      eyebrow: "Comunidad BszHackers",
+      name: ["Ecosistema", "Resiliencia"],
+      sub: "// Foros · Toolkits · Knowledge base",
+      dotLabel: "Comunidad",
+      details: {
+        Origin: "Telegram · Onion sites",
+        Tacticas: "Educación hacker, Counter-surveillance",
+        Alcance: "+15k miembros activos",
+        Filosofia: "El conocimiento no se detiene con leyes"
+      },
+      inspo: [
+        { text: "BszHackers no es solo un equipo ofensivo: es una red de soporte mutuo donde se comparten herramientas de anonimización, exploits educativos y análisis de ciberseguridad.", attr: "— Manifiesto 2022" },
+        { text: "Han organizado torneos de Capture The Flag (CTF) ético, generando una nueva generación de investigadores en ciberseguridad. Su lema: 'Aprende, rompe, construye, protege'.", attr: "— Comunidad" }
+      ]
+    },
+    {
+      eyebrow: "Legado & polémica",
+      name: ["Huella", "Persistencia"],
+      sub: "// Entre la leyenda y la amenaza",
+      dotLabel: "Legado",
+      details: {
+        Origin: "América · Europa",
+        Tacticas: "Descentralización total",
+        Alcance: "WikiLeaks-style leaks",
+        Filosofia: "Contra el silencio digital"
+      },
+      inspo: [
+        { text: "El impacto de BszTeam es innegable: filtraron más de 3TB de información clasificada de corporaciones y forzaron cambios en políticas de seguridad a nivel nacional. Su creador permanece en el anonimato más absoluto.", attr: "— Análisis forense" },
+        { text: "Críticos los llaman ciberterroristas; seguidores, héroes de la transparencia. Lo cierto: BszTeam redefinió lo que significa un colectivo hacker en la década del 2020.", attr: "— Coda del archivo" }
+      ]
+    }
+  ];
+
+  let current = 0, animating = false;
+  const DURATION = 5500;
+  let autoTimer, progTimer, progVal = 0;
+
+  const domSlides = document.querySelectorAll(".slide");
+  const domThumbs = document.querySelectorAll(".film-thumb");
+  const domFades = document.querySelectorAll(".fade-el");
+  const progressLine = document.getElementById("progressLine");
+  const counterNum = document.getElementById("counterNum");
+  const masterCount = document.getElementById("masterCount");
+  const prEyebrow = document.getElementById("prEyebrow");
+  const prHeadline = document.getElementById("prHeadline");
+  const prSub = document.getElementById("prSub");
+  const inspoArea = document.getElementById("inspoArea");
+  const dotList = document.getElementById("dotList");
+
+  const detMap = {
+    Origin: "dOrigin",
+    Tacticas: "dTacticas",
+    Alcance: "dAlcance",
+    Filosofia: "dFilosofia"
+  };
+
+  // generar dots
+  DATA.forEach((d, i) => {
+    const row = document.createElement("div");
+    row.className = "sl-dot-row" + (i === 0 ? " active" : "");
+    row.dataset.idx = i;
+    row.innerHTML = `<div class="sl-dot-track"></div><span class="sl-dot-label">${d.dotLabel}</span>`;
+    row.addEventListener("click", () => { goTo(i); resetAuto(); });
+    dotList.appendChild(row);
+  });
+
+  function goTo(idx) {
+    if (idx === current || animating) return;
+    animating = true;
+    const prev = current;
+    current = ((idx % DATA.length) + DATA.length) % DATA.length;
+
+    domSlides[prev].classList.remove("active");
+    domSlides[current].classList.add("active");
+    domThumbs[prev].classList.remove("active");
+    domThumbs[current].classList.add("active");
+    dotList.querySelectorAll(".sl-dot-row")[prev].classList.remove("active");
+    dotList.querySelectorAll(".sl-dot-row")[current].classList.add("active");
+
+    domFades.forEach(el => el.classList.add("out"));
+    setTimeout(() => {
+      renderContent();
+      domFades.forEach(el => el.classList.remove("out"));
+      animating = false;
+    }, 270);
+    resetProgress();
+  }
+
+  function renderContent() {
+    const d = DATA[current];
+    const n = String(current + 1).padStart(2, "0");
+    counterNum.textContent = n;
+    masterCount.textContent = `${n} / 04`;
+    prEyebrow.textContent = d.eyebrow;
+    prHeadline.innerHTML = `${d.name[0]}<em>${d.name[1]}</em>`;
+    prSub.textContent = d.sub;
+    Object.entries(detMap).forEach(([key, id]) => {
+      document.getElementById(id).textContent = d.details[key] || "—";
+    });
+    inspoArea.innerHTML = d.inspo.map((q, i) => `
+      <div class="inspo-item">
+        <div class="inspo-num">0${i+1}</div>
+        <div class="inspo-text">${q.text}</div>
+        <div class="inspo-attr">${q.attr}</div>
+      </div>
+    `).join("");
+  }
+
+  function resetProgress() {
+    clearInterval(progTimer);
+    progVal = 0;
+    progressLine.style.transition = "none";
+    progressLine.style.width = "0%";
+    requestAnimationFrame(() => {
+      progressLine.style.transition = "width 0.1s linear";
+      const step = 100 / (DURATION / 100);
+      progTimer = setInterval(() => {
+        progVal = Math.min(progVal + step, 100);
+        progressLine.style.width = progVal + "%";
+      }, 100);
+    });
+  }
+
+  function resetAuto() { clearInterval(autoTimer); startAuto(); }
+  function startAuto() { autoTimer = setInterval(() => goTo(current + 1), DURATION); }
+
+  document.getElementById("nextBtn").addEventListener("click", () => { goTo(current + 1); resetAuto(); });
+  document.getElementById("prevBtn").addEventListener("click", () => { goTo(current - 1); resetAuto(); });
+  document.getElementById("zoneRight").addEventListener("click", () => { goTo(current + 1); resetAuto(); });
+  document.getElementById("zoneLeft").addEventListener("click", () => { goTo(current - 1); resetAuto(); });
+  domThumbs.forEach(t => t.addEventListener("click", () => { goTo(parseInt(t.dataset.idx)); resetAuto(); }));
+
+  document.addEventListener("keydown", (e) => {
+    if (["ArrowRight", "ArrowDown"].includes(e.key)) { goTo(current + 1); resetAuto(); }
+    if (["ArrowLeft", "ArrowUp"].includes(e.key)) { goTo(current - 1); resetAuto(); }
+  });
+
+  let tx = 0;
+  document.addEventListener("touchstart", (e) => tx = e.touches[0].clientX, { passive: true });
+  document.addEventListener("touchend", (e) => {
+    const dx = tx - e.changedTouches[0].clientX;
+    if (Math.abs(dx) > 40) { goTo(dx > 0 ? current + 1 : current - 1); resetAuto(); }
+  });
+
+  // cursor custom
+  const cOuter = document.getElementById("cursor-outer");
+  const cInner = document.getElementById("cursor-inner");
+  const cLabel = document.getElementById("cursor-label");
+  let mx = -200, my = -200, ox = -200, oy = -200;
+  document.addEventListener("mousemove", (e) => { mx = e.clientX; my = e.clientY; cInner.style.left = mx + "px"; cInner.style.top = my + "px"; });
+  (function lerpCursor() {
+    ox += (mx - ox) * 0.13; oy += (my - oy) * 0.13;
+    cOuter.style.left = ox + "px"; cOuter.style.top = oy + "px";
+    cLabel.style.left = ox + "px"; cLabel.style.top = oy + "px";
+    requestAnimationFrame(lerpCursor);
+  })();
+
+  document.querySelectorAll(".sl-arrow, .sl-dot-row, .film-thumb").forEach(el => {
+    el.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
+    el.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
+  });
+  document.getElementById("zoneRight").addEventListener("mouseenter", () => { document.body.classList.add("cursor-hover", "show-label"); cLabel.textContent = "SIGUIENTE →"; });
+  document.getElementById("zoneRight").addEventListener("mouseleave", () => { document.body.classList.remove("cursor-hover", "show-label"); });
+  document.getElementById("zoneLeft").addEventListener("mouseenter", () => { document.body.classList.add("cursor-hover", "show-label"); cLabel.textContent = "← ANTERIOR"; });
+  document.getElementById("zoneLeft").addEventListener("mouseleave", () => { document.body.classList.remove("cursor-hover", "show-label"); });
+
+  renderContent();
+  resetProgress();
+  startAuto();
+</script>
+</body>
+</html>
